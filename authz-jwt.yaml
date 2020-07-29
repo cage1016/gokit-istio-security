@@ -1,0 +1,31 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-example
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  jwtRules:
+  - issuer: testing@secure.istio.io
+    jwks: |
+          {"keys":[{"kty":"RSA","kid":"GkNj4pf4WEojKjS1B8nvVceMoqlC8RqOwF5EhbHQ0Rk","n":"28yv3Dd74NIZPINbES_9EsVDR-e4DyprVyM9nq5l_-lJ0Lyae1ifxxJd4oMDuBRBvjZQUL0JuxzG-11eF4nRyvS_jir4s7FqAYAlyZw8-MfieTSz7E_i4Lg8El2MeWEgkairu62QX2-e8lm7SlMfSDNtEWN2hA3AwEnBnzWNEwcSwz3nwYhuPT5pX3Gyea2QH9EgPcket1HUbiuWx2ieiWDRq1zYDHt-B4XMvpOLxf-2VH98WNwfdA77lc9D7wbpl8-D1BqdQXLoF4-aw7un_TpjaMc72E3tnfiRyV6NG4RsoOxdmKVxtl96E_vVfZrAIytJTT2_UIEamBPlmMe1uQ","e":"AQAB"}]}
+    outputPayloadToHeader: X-Jwt-Playload
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: require-jwt
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["*"]
+    when:
+    - key: request.auth.claims[iss]
+      values: ["testing@secure.istio.io"]
