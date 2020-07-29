@@ -1,0 +1,5 @@
+image:
+  repository: qeekdev/postgres-multi-db
+  tag: latest
+postgresqlDatabases: authz
+postgresqlPassword: password

@@ -1,0 +1,15 @@
+tracing:
+  enabled: true
+  
+pilot:
+  traceSampling: 100.0
+
+global:
+  disablePolicyChecks: false
+
+mixer:
+  policy:
+    enabled: true  
+
+kiali:
+  enabled: true
