@@ -1,0 +1,54 @@
+add:
+  enabled: true
+  name: add
+  image:
+    repository: docker.io/cage1016/gokit-istio-security-add
+    tag: latest
+  imagePullSecretsName: ""
+  replicas: 1
+  versions: {}
+  env:
+    QS_LOG_LEVEL: info
+    QS_HTTP_PORT: "10120"
+    QS_GRPC_PORT: "10121"
+    QS_ZIPKIN_V2_URL: http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans
+
+foo:
+  enabled: true
+  name: foo
+  image:
+    repository: docker.io/cage1016/gokit-istio-security-foo
+    tag: latest
+  imagePullSecretsName: ""
+  replicas: 1
+  versions: {}
+  env:
+    QS_LOG_LEVEL: info
+    QS_HTTP_PORT: "10120"
+    QS_GRPC_PORT: "10121"
+    QS_ADD_URL: "add:8000"
+    QS_ZIPKIN_V2_URL: http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans    
+
+authz:
+  enabled: true
+  name: authz
+  image:
+    repository: docker.io/cage1016/gokit-istio-security-authz
+    tag: latest
+  imagePullSecretsName: ""
+  replicas: 1
+  versions: {}
+  env:
+    QS_LOG_LEVEL: info
+    QS_HTTP_PORT: "10120"
+    QS_GRPC_PORT: "10121"
+    QS_DB_HOST: postgresql.default.svc.cluster.local
+    QS_DB_PORT: "5432"
+    QS_DB: authz
+    QS_DB_USER: postgres
+    QS_DB_PASS: password
+    QS_ZIPKIN_V2_URL: http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans
+
+defaultResources:
+  requests:
+    cpu: 0

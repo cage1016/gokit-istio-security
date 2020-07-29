@@ -1,0 +1,74 @@
+{
+  "rolePermissions": {
+    "editor": [
+      {
+        "method": "GET",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/add/sum"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/add/concat"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/foo/foo"
+      }
+    ],
+    "owner": [
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/foo/foo"
+      },
+      {
+        "method": "GET",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/add/sum"
+      },
+      {
+        "method": "POST",
+        "path": "/api/([^\\\\/]+)/add/concat"
+      }
+    ],
+    "viewer": [
+      {
+        "method": "GET",
+        "path": "/api/([^\\\\/]+)/authz/roles"
+      }
+    ]
+  },
+  "userRoles": {
+    "0tywi6h69mdPKNN_NkI7B": [
+      "viewer"
+    ],
+    "eBenfKuCzAiAC_bfqETwY": [
+      "owner"
+    ]
+  }
+}

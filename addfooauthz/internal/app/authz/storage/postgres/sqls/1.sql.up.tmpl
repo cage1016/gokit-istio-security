@@ -1,0 +1,183 @@
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+create table if not exists gorp_migrations
+(
+    id         text not null
+        constraint gorp_migrations_pkey
+            primary key,
+    applied_at timestamp with time zone
+);
+
+alter table gorp_migrations
+    owner to {{.owner}};
+
+create table if not exists opa_actions
+(
+    id          varchar(21)  not null
+        constraint opa_actions_pkey
+            primary key,
+    name        varchar(255) not null,
+    description varchar(255) not null default '',
+    created_at  timestamp(0) not null default now(),
+    updated_at  timestamp(0) not null default now()
+);
+
+alter table opa_actions
+    owner to {{.owner}};
+
+DROP TRIGGER IF EXISTS set_timestamp
+    ON opa_actions;
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE
+    ON opa_actions
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+create table if not exists opa_permissions
+(
+    id          varchar(21)  not null
+        constraint opa_permissions_pkey
+            primary key,
+    action_id   varchar(21)  not null,
+    resource_id varchar(21)  not null,
+    created_at  timestamp(0) not null default now(),
+    updated_at  timestamp(0) not null default now(),
+    key         varchar(255)          default ''::character varying not null
+);
+
+alter table opa_permissions
+    owner to {{.owner}};
+
+DROP TRIGGER IF EXISTS set_timestamp
+    ON opa_permissions;
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE
+    ON opa_permissions
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+create table if not exists opa_resources
+(
+    id         varchar(21)  not null
+        constraint opa_resources_pkey
+            primary key,
+    name       varchar(255) not null
+        constraint opa_resources_name_key
+            unique,
+    created_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now()
+);
+
+alter table opa_resources
+    owner to {{.owner}};
+
+DROP TRIGGER IF EXISTS set_timestamp
+    ON opa_resources;
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE
+    ON opa_resources
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+create table if not exists opa_role_permissions
+(
+    role_id       varchar(21),
+    permission_id varchar(21)
+);
+
+alter table opa_role_permissions
+    owner to {{.owner}};
+
+create table if not exists opa_roles
+(
+    id         varchar(21)  not null
+        constraint opa_roles_pkey
+            primary key,
+    name       varchar(255)
+        constraint opa_roles_name_key
+            unique,
+    created_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now()
+);
+
+alter table opa_roles
+    owner to {{.owner}};
+
+DROP TRIGGER IF EXISTS set_timestamp
+    ON opa_roles;
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE
+    ON opa_roles
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+create table if not exists opa_user_roles
+(
+    user_id         varchar(21) not null,
+    role_id         varchar(21) not null,
+    constraint no_duplicate_user_id_role_id unique (user_id, role_id)
+);
+
+alter table opa_user_roles
+    owner to {{.owner}};
+
+create table if not exists opa_users
+(
+    id              varchar(21)  not null
+        primary key,
+    name            varchar(255),
+    email           varchar(255) not null,
+    user_id         varchar(255),
+    is_active       bool         not null default false,
+    provider        varchar(255) not null default '',
+    avatar          varchar(255) not null default '',
+    created_at      timestamp(0) not null default now(),
+    updated_at      timestamp(0) not null default now(),
+    constraint no_duplicate_id_domain_email_provider UNIQUE (email, provider)
+);
+
+alter table opa_users
+    owner to {{.owner}};
+
+DROP TRIGGER IF EXISTS set_timestamp
+    ON opa_users;
+CREATE TRIGGER set_timestamp
+    BEFORE UPDATE
+    ON opa_users
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+create or replace view policies_permissions(action_name, resource_name, role_name) as
+SELECT opa_actions.name   AS action_name,
+       opa_resources.name AS resource_name,
+       opa_roles.name     AS role_name
+FROM ((((opa_role_permissions
+    JOIN opa_roles ON ((opa_roles.id = opa_role_permissions.role_id)))
+    JOIN opa_permissions ON ((opa_permissions.id = opa_role_permissions.permission_id)))
+    JOIN opa_actions ON ((opa_actions.id = opa_permissions.action_id)))
+         JOIN opa_resources ON ((opa_resources.id = opa_permissions.resource_id)))
+ORDER BY opa_roles.name;
+
+alter table policies_permissions
+    owner to {{.owner}};
+
+create or replace view policies_roles(user_id, role_names) as
+SELECT policies_role.user_id,
+       string_agg((policies_role.role_name)::text, ','::text) AS role_names
+FROM (SELECT opa_users.id   AS user_id,
+             opa_roles.name AS role_name
+      FROM ((opa_user_roles
+          JOIN opa_users ON (((opa_users.id)::text = (opa_user_roles.user_id)::text)))
+               JOIN opa_roles ON (((opa_roles.id)::text = (opa_user_roles.role_id)::text)))
+      ORDER BY opa_users.id) policies_role
+GROUP BY policies_role.user_id;
+
+alter table policies_roles
+    owner to {{.owner}};

@@ -1,0 +1,136 @@
+{{- if .Values.authz.enabled }}
+{{- if eq (len $.Values.authz.versions) 0 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.authz.name }}
+spec:
+  replicas: {{ .Values.authz.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.authz.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.authz.name }}
+    spec:
+      containers:
+        - name: {{ .Values.authz.name }}
+          env:
+          {{- range $key, $value := .Values.authz.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          image: {{ $.Values.authz.image.repository }}:{{ $.Values.authz.image.tag }}
+          resources:
+{{ toYaml .Values.defaultResources | trim | indent 12 }}
+{{- if $.Values.authz.imagePullSecretsName }}
+      imagePullSecrets:
+        - name: {{ $.Values.authz.imagePullSecretsName }}
+{{- end }}
+{{- else }}
+{{- range $version, $imageTag := .Values.authz.versions }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.authz.name }}
+spec:
+  replicas: {{ $.Values.authz.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.authz.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.authz.name }}
+        version: {{ $version | quote }}
+    spec:
+      containers:
+        - name: {{ $.Values.authz.name }}
+          env:
+          {{- range $key, $value := $.Values.authz.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          image: {{ if $imageTag }}{{ $.Values.authz.image.repository }}:{{ $imageTag }}{{ else }}{{ $.Values.authz.image.repository }}:{{ $.Values.authz.image.tag }}{{ end }}
+          resources:
+{{ toYaml .Values.defaultResources | trim | indent 12 }}
+{{- if $.Values.authz.imagePullSecretsName }}
+      imagePullSecrets:
+        - name: {{ $.Values.authz.imagePullSecretsName }}
+{{- end }}
+{{- end }}
+{{- end }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.authz.name }}
+spec:
+  selector:
+    app: {{ .Values.authz.name }}
+  ports:
+    - port: 80
+      name: http
+      targetPort: {{ .Values.authz.env.QS_HTTP_PORT }}
+    - port: 8000
+      name: grpc
+      targetPort: {{ .Values.authz.env.QS_GRPC_PORT }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Values.authz.name }}
+spec:
+  hosts:
+    - {{ .Values.authz.name }}
+  http:
+  {{- range $key, $value := .Values.authz.versions }}
+    - match:
+      - headers:
+          version:
+            exact: {{ $key }}
+      route:
+        - destination:
+            host: {{ $.Values.authz.name }}
+            subset: {{ $key }}
+  {{- end }}
+    - route:
+        - destination:
+            host: {{ .Values.authz.name }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Values.authz.name }}
+spec:
+  host: {{ .Values.authz.name }}
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: RANDOM
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+{{- if gt (len $.Values.authz.versions) 0 }}
+  subsets:
+  {{- range $key, $value := .Values.authz.versions }}
+    - name: {{ $key }}
+      labels:
+        version: {{ $key }}
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+  {{- end }}
+{{- end }}
+{{- end }}

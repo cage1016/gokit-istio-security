@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package pb;
+
+// The Authz service definition.
+service Authz {
+  rpc IsAuthorizedReq(IsAuthorizedReqRequest) returns (IsAuthorizedReqResponse);
+  rpc GetRole(GetRoleRequest) returns (GetRoleResponse);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
+}
+
+message IsAuthorizedReqRequest {
+  string user = 1;
+  string path = 2;
+  string method = 3;
+}
+
+message IsAuthorizedReqResponse {
+  bool is_authorized = 1;
+  string err = 2;
+}
+
+message Action {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message CreateActionRequest {
+  Action action = 1;
+}
+
+message CreateActionResponse {
+  Action res = 1;
+  string err = 2;
+}
+
+message DeleteActionRequest {
+  string id = 1;
+}
+
+message DeleteActionResponse {
+  string err = 1;
+}
+
+message UpdateActionRequest {
+  Action action = 1;
+}
+
+message UpdateActionResponse {
+  Action res = 1;
+  string err = 2;
+}
+
+message ListActionsRequest {}
+
+message ListActionsResponse {
+  repeated Action res = 1;
+  string err = 2;
+}
+
+message GetActionRequest {
+  string id = 1;
+}
+
+message GetActionResponse {
+  Action res = 1;
+  string err = 2;
+}
+
+message Resource {
+  string id = 1;
+  string name = 2;
+  string created_at = 3;
+  string updated_at = 4;
+}
+
+message CreateResourceRequest {
+  Resource resource = 1;
+}
+
+message CreateResourceResponse {
+  Resource res = 1;
+  string err = 2;
+}
+
+message DeleteResourceRequest {
+  string id = 1;
+}
+
+message DeleteResourceResponse {
+  string err = 1;
+}
+
+message UpdateResourceRequest {
+  Resource resource = 1;
+}
+
+message UpdateResourceResponse {
+  Resource res = 1;
+  string err = 2;
+}
+
+message ListResourcesRequest {}
+
+message ListResourcesResponse {
+  repeated Resource res = 1;
+  string err = 2;
+}
+
+message GetResourceRequest {
+  string id = 1;
+}
+
+message GetResourceResponse {
+  Resource res = 1;
+  string err = 2;
+}
+
+message Role {
+  string id = 1;
+  string name = 2;
+  repeated RolePermission role_permissions = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message RolePermission {
+  string iD = 1;
+  Resource resource = 2;
+  Action action = 3;
+}
+
+message GetRoleRequest {
+  string role_id = 1;
+}
+
+message GetRoleResponse {
+  Role res = 1;
+  string err = 2;
+}
+
+message ListRolesRequest {}
+
+message ListRolesResponse {
+  repeated Role items = 1;
+  string err = 2;
+}
+
+message UserRole {
+  string id = 1;
+  string name = 2;
+  string organization_id = 3;
+  string store_id = 4;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string user_id = 4;
+  bool is_active = 5;
+  string provider = 6;
+  string avatar = 7;
+  string organization_id = 8;
+  repeated UserRole user_roles = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}

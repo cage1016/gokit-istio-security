@@ -1,0 +1,136 @@
+{{- if .Values.add.enabled }}
+{{- if eq (len $.Values.add.versions) 0 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.add.name }}
+spec:
+  replicas: {{ .Values.add.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.add.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.add.name }}
+    spec:
+      containers:
+        - name: {{ .Values.add.name }}
+          env:
+          {{- range $key, $value := .Values.add.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          image: {{ $.Values.add.image.repository }}:{{ $.Values.add.image.tag }}
+          resources:
+{{ toYaml .Values.defaultResources | trim | indent 12 }}
+{{- if $.Values.add.imagePullSecretsName }}
+      imagePullSecrets:
+        - name: {{ $.Values.add.imagePullSecretsName }}
+{{- end }}
+{{- else }}
+{{- range $version, $imageTag := .Values.add.versions }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.add.name }}-{{ $version }}
+spec:
+  replicas: {{ $.Values.add.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.add.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.add.name }}
+        version: {{ $version | quote }}
+    spec:
+      containers:
+        - name: {{ $.Values.add.name }}
+          env:
+          {{- range $key, $value := $.Values.add.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          image: {{ if $imageTag }}{{ $.Values.add.image.repository }}:{{ $imageTag }}{{ else }}{{ $.Values.add.image.repository }}:{{ $.Values.add.image.tag }}{{ end }}
+          resources:
+{{ toYaml .Values.defaultResources | trim | indent 12 }}
+{{- if $.Values.add.imagePullSecretsName }}
+      imagePullSecrets:
+        - name: {{ $.Values.add.imagePullSecretsName }}
+{{- end }}
+{{- end }}
+{{- end }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.add.name }}
+spec:
+  selector:
+    app: {{ .Values.add.name }}
+  ports:
+    - port: 80
+      name: http
+      targetPort: {{ .Values.add.env.QS_HTTP_PORT }}
+    - port: 8000
+      name: grpc
+      targetPort: {{ .Values.add.env.QS_GRPC_PORT }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Values.add.name }}
+spec:
+  hosts:
+    - {{ .Values.add.name }}
+  http:
+  {{- range $key, $value := .Values.add.versions }}
+    - match:
+      - headers:
+          version:
+            exact: {{ $key }}
+      route:
+        - destination:
+            host: {{ $.Values.add.name }}
+            subset: {{ $key }}
+  {{- end }}
+    - route:
+        - destination:
+            host: {{ .Values.add.name }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Values.add.name }}
+spec:
+  host: {{ .Values.add.name }}
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: RANDOM
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+{{- if gt (len $.Values.add.versions) 0 }}
+  subsets:
+  {{- range $key, $value := .Values.add.versions }}
+    - name: {{ $key }}
+      labels:
+        version: {{ $key }}
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+  {{- end }}
+{{- end }}
+{{- end }}
