@@ -2,7 +2,7 @@ apiVersion: skaffold/v1
 kind: Config
 build:
   artifacts:          
-    - image: docker.io/cage1016/gokit-istio-security-add
+    - image: cage1016/gokit-istio-security-add
       custom:
         buildCommand: make dev_docker_add
         dependencies:
@@ -10,7 +10,7 @@ build:
             - cmd/add/main.go
             - internal/app/add
             - internal/pkg
-    - image: docker.io/cage1016/gokit-istio-security-foo
+    - image: cage1016/gokit-istio-security-foo
       custom:
         buildCommand: make dev_docker_foo
         dependencies:
@@ -18,7 +18,7 @@ build:
             - cmd/foo/main.go
             - internal/app/foo
             - internal/pkg            
-    - image: docker.io/cage1016/gokit-istio-security-authz
+    - image: cage1016/gokit-istio-security-authz
       custom:
         buildCommand: make dev_docker_authz
         dependencies:
@@ -28,7 +28,7 @@ build:
             - internal/pkg
   tagPolicy:
     envTemplate:
-      template: "{{.IMAGE_NAME}}:dev"
+      template: "dev"
   local: {}
 deploy:
   helm:
@@ -41,6 +41,6 @@ deploy:
         imageStrategy:
           helm: {}
         values:
-          add.image: docker.io/cage1016/gokit-istio-security-add
-          foo.image: docker.io/cage1016/gokit-istio-security-foo
-          authz.image: docker.io/cage1016/gokit-istio-security-authz
+          add.image: cage1016/gokit-istio-security-add
+          foo.image: cage1016/gokit-istio-security-foo
+          authz.image: cage1016/gokit-istio-security-authz

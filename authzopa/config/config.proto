@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+// config for authzopa adapter
+package adapter.authzopa.config;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "config";
+
+// config for auth adapter
+message Params {
+    // test token
+    string token = 1;
+
+    string authz_server_url = 2;
+}

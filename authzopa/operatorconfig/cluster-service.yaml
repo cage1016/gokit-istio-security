@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authzopa-adapter-service
+  namespace: istio-system
+  labels:
+    app: authzopa-adapter
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    protocol: TCP
+    port: 44225
+    targetPort: 44225
+  selector:
+    app: authzopa-adapter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authzopa-adapter
+  namespace: istio-system
+  labels:
+    app: authzopa-adapter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authzopa-adapter
+  template:
+    metadata:
+      labels:
+        app: authzopa-adapter
+      annotations:
+        sidecar.istio.io/inject: "false"
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+    spec:
+      containers:
+      - name: authzopa-adapter
+        image: cage1016/adapter-authzopa:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 44225

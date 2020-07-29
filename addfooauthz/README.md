@@ -15,11 +15,17 @@
 
 ## Setup
 
-istio 1.5.6 and psql database install guide please vist [gokit-istio-security README](../README.md)
+- istio 1.5.6 and psql database install guide please vist [gokit-istio-security README](../README.md)
+- [Skaffold](https://skaffold.dev/) 13.1
 
 ### skaffold run addfooauthz
 
 ```bash
+# apply addfoodauthz directly
+$ k apply -f https://raw.githubusercontent.com/cage1016/gokit-istio-security/master/addfooauthz/deployments/k8s/addfooauthz-all.yaml
+
+# or
+# run addfoodauthz by skaffold and build docker image locally
 $ cd addfooauthz
 $ skaffold run
 ```

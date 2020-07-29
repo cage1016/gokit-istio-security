@@ -1,0 +1,42 @@
+apiVersion: "config.istio.io/v1alpha2"
+kind: handler
+metadata:
+  name: h1
+  namespace: istio-system
+spec:
+  adapter: authzopa-adapter
+  connection:
+    address: "[::]:44225"
+    # address: "authzopa-adapter-service:44225"
+  params:
+    token: "abc"
+    authz_server_url: "localhost:10121"
+
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: i1authorization
+  namespace: istio-system
+spec:
+  template: authorization
+  params:
+    subject:
+      properties:
+        x_jwt_playload: request.headers["x-jwt-playload"]
+        request_method: request.method
+        request_path: request.path
+
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: r1
+  namespace: istio-system
+spec:
+  match: match(request.path, "/api/v*")
+  actions:
+  - handler: h1.istio-system
+    instances:
+    - i1authorization
+---

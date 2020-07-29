@@ -11,7 +11,7 @@ owner_token:
 viewer_token:
 	$(call fnToken,$(viewer_payload))
 
-## scenario1_sum: scenario 1 add:sum API
+## scenario1_add_sum: scenario 1 add:sum API
 scenario1_add_sum:
 	curl -X "POST" "http://localhost:80/api/v1/add/sum" \
 		-H 'Content-Type: application/json' \

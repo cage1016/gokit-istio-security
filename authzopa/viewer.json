@@ -1,0 +1,8 @@
+{
+    "sub": "viewer@example.com",
+    "iss": "testing@secure.istio.io",
+    "roles": [
+        "viewer"
+    ],
+    "userId": "0tywi6h69mdPKNN_NkI7B"
+}

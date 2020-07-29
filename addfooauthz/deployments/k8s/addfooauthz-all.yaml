@@ -1,0 +1,332 @@
+---
+# Source: gokit-istio-security/templates/add.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: add
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: add
+  template:
+    metadata:
+      labels:
+        app: add
+    spec:
+      containers:
+        - name: add
+          env:
+            - name: QS_GRPC_PORT
+              value: "10121"
+            - name: QS_HTTP_PORT
+              value: "10120"
+            - name: QS_LOG_LEVEL
+              value: "info"
+            - name: QS_ZIPKIN_V2_URL
+              value: "http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans"
+          image: cage1016/gokit-istio-security-add:dev@sha256:5bda99e09d5e02d1cbec5b9c2a693f52b09ad946a3a293b68658b8ebe4a47edd
+          resources:
+            requests:
+              cpu: 0
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: add
+spec:
+  selector:
+    app: add
+  ports:
+    - port: 80
+      name: http
+      targetPort: 10120
+    - port: 8000
+      name: grpc
+      targetPort: 10121
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: add
+spec:
+  hosts:
+    - add
+  http:
+    - route:
+        - destination:
+            host: add
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: add
+spec:
+  host: add
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: RANDOM
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+
+---
+# Source: gokit-istio-security/templates/authz.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authz
+  template:
+    metadata:
+      labels:
+        app: authz
+    spec:
+      containers:
+        - name: authz
+          env:
+            - name: QS_DB
+              value: "authz"
+            - name: QS_DB_HOST
+              value: "postgresql.default.svc.cluster.local"
+            - name: QS_DB_PASS
+              value: "password"
+            - name: QS_DB_PORT
+              value: "5432"
+            - name: QS_DB_USER
+              value: "postgres"
+            - name: QS_GRPC_PORT
+              value: "10121"
+            - name: QS_HTTP_PORT
+              value: "10120"
+            - name: QS_LOG_LEVEL
+              value: "info"
+            - name: QS_ZIPKIN_V2_URL
+              value: "http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans"
+          image: cage1016/gokit-istio-security-authz:dev@sha256:756589332f29913f2e2c1f8b785bff8a3172dc993df11d505f5bd2555235124f
+          resources:
+            requests:
+              cpu: 0
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: authz
+spec:
+  selector:
+    app: authz
+  ports:
+    - port: 80
+      name: http
+      targetPort: 10120
+    - port: 8000
+      name: grpc
+      targetPort: 10121
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: authz
+spec:
+  hosts:
+    - authz
+  http:
+    - route:
+        - destination:
+            host: authz
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: authz
+spec:
+  host: authz
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: RANDOM
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+
+---
+# Source: gokit-istio-security/templates/foo.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: foo
+  template:
+    metadata:
+      labels:
+        app: foo
+    spec:
+      containers:
+        - name: foo
+          env:
+            - name: QS_ADD_URL
+              value: "add:8000"
+            - name: QS_GRPC_PORT
+              value: "10121"
+            - name: QS_HTTP_PORT
+              value: "10120"
+            - name: QS_LOG_LEVEL
+              value: "info"
+            - name: QS_ZIPKIN_V2_URL
+              value: "http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans"
+          image: cage1016/gokit-istio-security-foo:dev@sha256:93913e1504310392a4b523c70c1ed9d89a60bf75c3cdf6d72c88b03648ee0b5d
+          resources:
+            requests:
+              cpu: 0
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: foo
+spec:
+  selector:
+    app: foo
+  ports:
+    - port: 80
+      name: http
+      targetPort: 10120
+    - port: 8000
+      name: grpc
+      targetPort: 10121
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: foo
+spec:
+  hosts:
+    - foo
+  http:
+    - route:
+        - destination:
+            host: foo
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: foo
+spec:
+  host: foo
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    loadBalancer:
+      simple: RANDOM
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+
+---
+# Source: gokit-istio-security/templates/ingress-http.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: http-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ingress-http
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - http-gateway
+  http:
+    - match:
+      - uri:
+          prefix: /api/v1/add/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: add
+            port:
+              number: 80
+          headers:
+            request:
+              add:
+                version: v1
+    - match:
+      - uri:
+          prefix: /api/v1/foo/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: foo
+            port:
+              number: 80
+          headers:
+            request:
+              add:
+                version: v1                
+    - match:
+      - uri:
+          prefix: /api/v1/authz/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: authz
+            port:
+              number: 80
+          headers:
+            request:
+              add:
+                version: v1
+
+
