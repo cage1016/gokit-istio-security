@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "1.0"
-description: A Demo for gokit isito security
-name: gokit-istio-security
-version: 0.1.0

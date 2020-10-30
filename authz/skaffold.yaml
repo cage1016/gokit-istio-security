@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta5
+kind: Config
+build:
+  artifacts:                
+    - image: index.docker.io/cage1016/gokit-istio-security-authz
+      buildpacks:
+        builder: "gcr.io/buildpacks/builder:v1"
+        env:
+          - GOOGLE_BUILDABLE=cmd/authz/main.go
+  tagPolicy:
+    sha256: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+    - ./deployments/kubernetes-manifests/authz.yaml

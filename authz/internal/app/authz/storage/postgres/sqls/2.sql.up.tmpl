@@ -1,0 +1,38 @@
+INSERT INTO public.opa_actions (id, name, description, created_at, updated_at) VALUES ('cjUSlQDR_yB6rUdGmrjAq', 'GET','GET', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_actions (id, name, description, created_at, updated_at) VALUES ('mjBX2RWsFtXWu7rAr_Lxm', 'POST','POST', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_actions (id, name, description, created_at, updated_at) VALUES ('TGFv-EhBmxIoLijjTR8we', 'PUT','PUT', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_actions (id, name, description, created_at, updated_at) VALUES ('yFbqUkdRWD7BDEOg8nNlp', 'DELETE','DELETE', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+
+INSERT INTO public.opa_resources (id, name, created_at, updated_at) VALUES ('PHSw2Zy5Y1DHo_NLM-T5F', '/api/([^\\/]+)/authz/roles/[a-zA-Z0-9_-~]{21}', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_resources (id, name, created_at, updated_at) VALUES ('kmVgtJ-kajFm2844fZNZ4', '/api/([^\\/]+)/add/sum', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_resources (id, name, created_at, updated_at) VALUES ('8_N-g8K1YzDt5iDZoCAjD', '/api/([^\\/]+)/tictac/tic', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_resources (id, name, created_at, updated_at) VALUES ('OzSYHD1abeOtVs4gGikVl', '/api/([^\\/]+)/tictac/tac', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_resources (id, name, created_at, updated_at) VALUES ('3SiOm--nzQMbWGOdSl7aU', '/api/([^\\/]+)/authz/roles', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+
+INSERT INTO public.opa_permissions (id, action_id, resource_id, created_at, updated_at, key) VALUES ('pJUQtkC5lvsxREoDilChe', 'cjUSlQDR_yB6rUdGmrjAq', '3SiOm--nzQMbWGOdSl7aU', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00', 'GET:/api/([^\\/]+)/authz/roles');
+INSERT INTO public.opa_permissions (id, action_id, resource_id, created_at, updated_at, key) VALUES ('Kx_3EpbOu5Wfpr22vlFFE', 'cjUSlQDR_yB6rUdGmrjAq', 'PHSw2Zy5Y1DHo_NLM-T5F', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00', 'GET:/api/([^\\/]+)/authz/roles/[a-zA-Z0-9_-~]{21}');
+INSERT INTO public.opa_permissions (id, action_id, resource_id, created_at, updated_at, key) VALUES ('DroOEXHNiJ_vT3puQmTQU', 'mjBX2RWsFtXWu7rAr_Lxm', 'kmVgtJ-kajFm2844fZNZ4', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00', 'POST:/api/([^\\/]+)/add/sum');
+INSERT INTO public.opa_permissions (id, action_id, resource_id, created_at, updated_at, key) VALUES ('04JI3JLKx570heEbS81Kf', 'mjBX2RWsFtXWu7rAr_Lxm', '8_N-g8K1YzDt5iDZoCAjD', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00', 'POST:/api/([^\\/]+)/tictac/tic');
+INSERT INTO public.opa_permissions (id, action_id, resource_id, created_at, updated_at, key) VALUES ('j7hkATZvMaRVv4VLijEOy', 'cjUSlQDR_yB6rUdGmrjAq', 'OzSYHD1abeOtVs4gGikVl', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00', 'GET:/api/([^\\/]+)/tictac/tac');
+
+INSERT INTO public.opa_roles (id, name, created_at, updated_at) VALUES ('G0znZWT5ajITIT97v6WXi', 'owner', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_roles (id, name, created_at, updated_at) VALUES ('UPx0EEEJRC3Mz0ltwpD4g', 'editor', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+INSERT INTO public.opa_roles (id, name, created_at, updated_at) VALUES ('_RPxKXZ6Es36~_ZPukluT', 'viewer', '2020-10-30T09:48:40+08:00', '2020-10-30T09:48:40+08:00');
+
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('G0znZWT5ajITIT97v6WXi', 'pJUQtkC5lvsxREoDilChe');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('G0znZWT5ajITIT97v6WXi', 'Kx_3EpbOu5Wfpr22vlFFE');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('G0znZWT5ajITIT97v6WXi', 'DroOEXHNiJ_vT3puQmTQU');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('G0znZWT5ajITIT97v6WXi', '04JI3JLKx570heEbS81Kf');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('G0znZWT5ajITIT97v6WXi', 'j7hkATZvMaRVv4VLijEOy');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('UPx0EEEJRC3Mz0ltwpD4g', '04JI3JLKx570heEbS81Kf');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('UPx0EEEJRC3Mz0ltwpD4g', 'j7hkATZvMaRVv4VLijEOy');
+INSERT INTO public.opa_role_permissions (role_id, permission_id) VALUES ('_RPxKXZ6Es36~_ZPukluT', 'DroOEXHNiJ_vT3puQmTQU');
+
+
+INSERT INTO public.opa_user_roles (user_id, role_id) VALUES ('eBenfKuCzAiAC_bfqETwY','G0znZWT5ajITIT97v6WXi');
+INSERT INTO public.opa_user_roles (user_id, role_id) VALUES ('Ba1VdhoB37hZLOiVBb_hK','UPx0EEEJRC3Mz0ltwpD4g');
+INSERT INTO public.opa_user_roles (user_id, role_id) VALUES ('0tywi6h69mdPKNN_NkI7B','_RPxKXZ6Es36~_ZPukluT');
+
+INSERT INTO public.opa_users (id, name, email, user_id, is_active, provider, avatar, created_at, updated_at) VALUES ('eBenfKuCzAiAC_bfqETwY', '', 'owner@example.com', '', true, 'google', '', '2020-03-10 07:05:31', '2020-03-10 07:09:44');
+INSERT INTO public.opa_users (id, name, email, user_id, is_active, provider, avatar, created_at, updated_at) VALUES ('Ba1VdhoB37hZLOiVBb_hK', '', 'editor@example.com', '', true, 'google', '', '2020-03-10 07:05:31', '2020-03-10 07:09:44');
+INSERT INTO public.opa_users (id, name, email, user_id, is_active, provider, avatar, created_at, updated_at) VALUES ('0tywi6h69mdPKNN_NkI7B', '', 'viewer@example.com', '', true, 'google', '', '2020-03-10 07:05:31', '2020-03-10 07:09:44');

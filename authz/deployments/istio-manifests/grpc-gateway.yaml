@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: authz-grpc-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "*"
+    port:
+      name: grpc
+      number: 443
+      protocol: HTTP      
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ms-ingress-grpc
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - authz-grpc-gateway
+  http:
+    - match:
+      - uri:
+          prefix: /pb.Authz
+      route:
+      - destination:
+          host: authz
+          port:
+            number: 8000
