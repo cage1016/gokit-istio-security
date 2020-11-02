@@ -1,0 +1,8 @@
+{
+    "sub": "editor@example.com",
+    "iss": "testing@secure.istio.io",
+    "roles": [
+        "editor"
+    ],
+    "userId": "Ba1VdhoB37hZLOiVBb_hK"
+}
