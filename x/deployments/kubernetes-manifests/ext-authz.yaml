@@ -1,0 +1,39 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: extauthz
+spec:
+  selector:
+    app: extauthz
+  ports:
+    - port: 50051
+      targetPort: 50051
+      name: grpc
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extauthz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: extauthz
+  template:
+    metadata:
+      labels:
+        app: extauthz
+    spec:
+      containers:
+        - name: extauthz
+          env:
+            - name: QS_AUTHZ_URL
+              value: "authz:8000"
+            - name: QS_BY_PASS
+              value: "false"
+            - name: QS_GRPC_PORT
+              value: "50051"
+            - name: QS_LOG_LEVEL
+              value: "info"
+          image: index.docker.io/cage1016/gokit-istio-security-extauthz

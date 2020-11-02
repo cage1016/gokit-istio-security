@@ -1,0 +1,140 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: extauth-authz
+spec:
+  workloadSelector:
+    labels:
+      app: authz
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.http_connection_manager
+            subFilter:
+              name: envoy.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.ext_authz
+        typed_config:
+          '@type': type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
+          grpc_service:
+            envoy_grpc:
+              cluster_name: grpc-ext-auth-cluster
+  - applyTo: CLUSTER
+    match:
+      context: SIDECAR_INBOUND
+    patch:
+      operation: ADD
+      value:
+        name: grpc-ext-auth-cluster
+        type: STRICT_DNS
+        connect_timeout: 0.25s
+        http2_protocol_options: {}
+        load_assignment:
+          cluster_name: grpc-als-cluster
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: extauthz.default.svc.cluster.local
+                    port_value: 50051
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: extauth-add
+spec:
+  workloadSelector:
+    labels:
+      app: add
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.http_connection_manager
+            subFilter:
+              name: envoy.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.ext_authz
+        typed_config:
+          '@type': type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
+          grpc_service:
+            envoy_grpc:
+              cluster_name: grpc-ext-auth-cluster
+  - applyTo: CLUSTER
+    match:
+      context: SIDECAR_INBOUND
+    patch:
+      operation: ADD
+      value:
+        name: grpc-ext-auth-cluster
+        type: STRICT_DNS
+        connect_timeout: 0.25s
+        http2_protocol_options: {}
+        load_assignment:
+          cluster_name: grpc-als-cluster
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: extauthz.default.svc.cluster.local
+                    port_value: 50051
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: extauth-tictac
+spec:
+  workloadSelector:
+    labels:
+      app: tictac
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.http_connection_manager
+            subFilter:
+              name: envoy.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.ext_authz
+        typed_config:
+          '@type': type.googleapis.com/envoy.config.filter.http.ext_authz.v2.ExtAuthz
+          grpc_service:
+            envoy_grpc:
+              cluster_name: grpc-ext-auth-cluster
+  - applyTo: CLUSTER
+    match:
+      context: SIDECAR_INBOUND
+    patch:
+      operation: ADD
+      value:
+        name: grpc-ext-auth-cluster
+        type: STRICT_DNS
+        connect_timeout: 0.25s
+        http2_protocol_options: {}
+        load_assignment:
+          cluster_name: grpc-als-cluster
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: extauthz.default.svc.cluster.local
+                    port_value: 50051
