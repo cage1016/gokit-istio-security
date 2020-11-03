@@ -14,11 +14,13 @@
 
 ## Services
 
-| Service | Description           | repo                                                                                               |
-| ------- | --------------------- | -------------------------------------------------------------------------------------------------- |
-| add     | Expose Sum method     | [cage1016/ms-demo: gokit microservice demo](https://github.com/cage1016/ms-demo)                   |
-| tictac  | Expose Tic/Tac method | [cage1016/ms-demo: gokit microservice demo](https://github.com/cage1016/ms-demo)                   |
-| authz   | authorization RBAC    | [cage1016/ms-demo-authz: gokit microservice demo authz](https://github.com/cage1016/ms-demo-authz) |
+| Service                      | Description           | repo                                                                                                             |
+| ---------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| add                          | Expose Sum method     | [cage1016/ms-demo: gokit microservice demo](https://github.com/cage1016/ms-demo)                                 |
+| tictac                       | Expose Tic/Tac method | [cage1016/ms-demo: gokit microservice demo](https://github.com/cage1016/ms-demo)                                 |
+| authz                        | authorization RBAC    | [cage1016/ms-demo-authz: gokit microservice demo authz](https://github.com/cage1016/ms-demo-authz)               |
+| custom mixer adapter         | authzopa              | [gokit-istio-security/authzopa](https://github.com/cage1016/gokit-istio-security/blob/master/authzopa/README.md) |
+| envoy external authorization | extauthz              | [gokit-istio-security/extauthz](https://github.com/cage1016/gokit-istio-security/blob/master/extauthz/README.md) |
 
 ## Features
 
@@ -35,13 +37,13 @@
 
 ## Infrastructure
 - Mixer
-![infrastructure Mixer](./infrastructure-mixer.png)
+![infrastructure Mixer](./infrastructure-mixer.jpg)
 
 - Envoy External
-![infrastructure Envoy External](./infrastructure-ef.png)
+![infrastructure Envoy External](./infrastructure-ef.jpg)
 
 ## Prepare
-1. istio require 1.5
+- istio require 1.5 above [Istioldie 1.5 / Authorization Policy](https://istio.io/v1.5/pt-br/docs/reference/config/security/authorization-policy/)
 
 ## Scenario1: install ms-demo
 
