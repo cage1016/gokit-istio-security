@@ -181,7 +181,7 @@ spec:
           value: "50051"
         - name: QS_LOG_LEVEL
           value: info
-        image: index.docker.io/cage1016/gokit-istio-security-extauthz:38b0cc81f6d54e0119745f4f833f640198ed25261f0024b3549b9f1c2d63f780
+        image: index.docker.io/cage1016/gokit-istio-security-extauthz
         name: extauthz
 ---
 apiVersion: security.istio.io/v1beta1
