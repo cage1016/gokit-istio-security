@@ -103,17 +103,17 @@
 2. Access by Command
     - any request without valid JWT token is forbidden
     ```sh
+    # RBAC: access denied
     curl -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
-    RBAC: access denied
 
+    # RBAC: access denied
     curl -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
-    RBAC: access denied
 
+    # RBAC: access denied
     curl "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
-    RBAC: access denied
 
+    # RBAC: access denied
     curl "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
-    RBAC: access denied
     ```
 3. Access those API with any valid JWT token
     - export valid token for `owner`, `editor`, & `viwer`
@@ -130,13 +130,17 @@
     - Access those API with valid token
     > you could use $EDITOR_TOKEN or $VIEWER_TOKEN as you want
     ```sh
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
 4. Install custom mixer adpater
     > Please visit [authzopa (istio custom authorization mixer adapter) README](./authzopa/README.md) for more detail how to create custom istio mixier adpater
@@ -204,38 +208,45 @@
     - As above OPA data describe. `owner` allow to access ALL APIs, `editor` ONLY allow to access `/api/v1/tictac/*` APIs and `viewer` ONLY allow to access `/api/v1/add/sum` API. Our custom istio authorization mixer adapter `authzopa` will verify REQUEST by calling `authz` `/pb.Authz/IsAuthorizedReq` GRPC
     - owner could access any APis
     ```sh
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     - editor ONLY allow to access `tictac` APIs
     ```sh
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'    
     
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
+    #204
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     - viewer ONLY allow to access `add` APis
     ```sh
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"    
 
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"    
 
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     -  Clean up
     ```bash
@@ -325,38 +336,45 @@
     ```
     - owner could access any APis
     ```sh
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
+    #204
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $OWNER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     - editor ONLY allow to access `tictac` APIs
     ```sh
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
+    #204
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EDITOR_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     - viewer ONLY allow to access `add` APis
     ```sh
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
+    #200
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/add/sum" -H 'Content-Type: application/json' -d '{ "a": 3, "b": 34}'
     
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" -X "POST" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tic"
 
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/tictac/tac"
 
-    curl -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
-    PERMISSION_DENIED:h1.handler.istio-system:Unauthorized: permission deny
+    #403
+    curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VIEWER_TOKEN" "http://$GATEWAY_HTTP_URL/api/v1/authz/roles"
     ```
     -  Clean up
     ```bash
@@ -367,19 +385,19 @@
 ## CleanUP
 - ms-demo-authz
 ```sh
-# install ms-demo-authz
-kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo-authz/master/deployments/all.yaml
-
 # install ms-demo-authz istio
 kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo-authz/master/deployments/gateway.yaml
-```
-- ms-demo-authz
-```sh
-# install ms-demo
-kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo/master/deployments/all.yaml
 
+# install ms-demo-authz
+kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo-authz/master/deployments/all.yaml
+```
+- ms-demo
+```sh
 # install ms-demo istio
 kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo/master/deployments/gateway.yaml
+
+# install ms-demo
+kubectl delete -f https://raw.githubusercontent.com/cage1016/ms-demo/master/deployments/all.yaml
 ```
 
 
