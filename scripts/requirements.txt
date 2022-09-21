@@ -2,5 +2,5 @@ cffi==1.14.0
 cryptography==2.9.2
 jwcrypto==0.7
 pycparser==2.20
-python-jwt==3.2.6
+python-jwt==3.3.4
 six==1.15.0
